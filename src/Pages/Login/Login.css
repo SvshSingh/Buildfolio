@@ -1,0 +1,38 @@
+.login {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* background-color: #050816; */
+    background-color: transparent;
+  }
+  .login__container {
+    display: flex;
+    flex-direction: column;
+    /* text-align: center; */
+    padding: 30px;
+    /* background-color: #151030; */
+    background-color: #ffffff17;
+    border-radius: 6px;
+
+  }
+  .login__textBox {
+    /* background-color: #050816; */
+    background-color: #000000c9;;
+    /* border: #090e27; */
+  }
+  .login__btn {
+    color: white;
+    background-color: rgb(145 94 255 / 44%);
+    transition: all 0.2s;
+  }
+  .login__btn:hover {
+    background-color: rgb(145 94 255 / 84%);;
+  }
+  .login__google {
+    background-color: #4285f4;
+  }
+  .login div {
+    margin-top: 7px;
+  }
