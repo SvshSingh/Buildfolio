@@ -18,7 +18,7 @@ query,  getDocs,
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "abcd",
+  apiKey: "AIzaSyBC5BO3mWIMJ-jOLcH7MGT1h3JKgEIUWtY",
   authDomain: "show-it-2a948.firebaseapp.com",
   projectId: "show-it-2a948",
   storageBucket: "show-it-2a948.appspot.com",
