@@ -1,113 +1,63 @@
-<h1 align="center">BUILDFOLIO</h1>
+# FolioFast
 
+Build and publish a developer portfolio in minutes. Next.js 16 + Supabase, with
+a guided wizard, 12 templates, and a public page at `/p/<username>`.
 
+## Requirements
 
-## About
+- Node.js **20.9 or newer** (Next.js 16 refuses to build on Node 18)
+- A Supabase project
 
-Buildfolio is a user-friendly 'Make Your Own Portfolio' platform enabling users to create personalized portfolio websites with 3D models. It features seamless portfolio creation, including sections like work experience, skills, and contact details. Leveraging the power of Three.js, Buildfolio offers an attractive and dynamic interface for showcasing portfolios.
+## Setup
 
+```bash
+npm install
+cp .env.example .env.local
+```
 
-<br>
+Fill in `.env.local` from **Supabase > Project Settings > API**, then create the
+tables by running [`supabase/schema.sql`](supabase/schema.sql) in the Supabase
+SQL editor.
 
----
-<br>
+```bash
+npm run dev
+```
 
-[![](https://img.shields.io/badge/Made_with-TailwindCSS-green?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
-[![](https://img.shields.io/badge/Made_with-React-green?style=for-the-badge&logo=react)](https://reactjs.org/)
-[![](https://img.shields.io/badge/Made_with-Node.js-green?style=for-the-badge&logo=node.js)](https://nodejs.org/en/)
-[![](https://img.shields.io/badge/Made_with-Three.js-green?style=for-the-badge&logo=three.js)](https://threejs.org/)
-[![](https://img.shields.io/badge/Made_with-Firebase-green?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
-[![](https://img.shields.io/badge/Made_with-Git-green?style=for-the-badge&logo=git)](https://git-scm.com/)
-[![](https://img.shields.io/badge/Made_with-GitHub-green?style=for-the-badge&logo=github)](https://github.com/)
+## Configuring magic-link sign-in
 
-<br>
+Sign-in is passwordless. Three things must line up or no email arrives:
 
----
-## Tech Stacks Used
+1. **Redirect URLs** — under *Authentication > URL Configuration*, add every
+   origin you sign in from (`http://localhost:3000`, your production URL).
+   Supabase rejects a magic link whose `emailRedirectTo` is not on this list.
+2. **Email provider enabled** — under *Authentication > Providers > Email*, keep
+   the email provider and signups on. With signups disabled, `signInWithOtp`
+   sends nothing to addresses that don't already exist.
+3. **SMTP** — the built-in Supabase mailer sends **2 emails per hour** and only
+   to addresses on your project's team. Anything beyond that is dropped. Set up
+   a custom SMTP provider under *Authentication > SMTP Settings* before testing
+   with real users. This is the most common cause of "the link never arrives".
 
-<div align=”center”>
-</div>
-<br>
+`/auth/callback` accepts both link formats: PKCE links (`?code=`) and the
+default email-template links (`?token_hash=&type=`). Failures redirect back to
+`/auth?error=…` so the reason is visible instead of a silent bounce.
 
-- *Front-end Development*: React.js, TailwindCSS
-- *Back-end Development*: Node.js, Express.js
-- *3D Models and Graphics*: Three.js
-- *Database and Authentication*: Firebase
+## Scripts
 
-<br>
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Dev server on http://localhost:3000 |
+| `npm run build` | Production build |
+| `npm run typecheck` | TypeScript check, no emit |
+| `npm run lint` | ESLint |
 
----
+## Structure
 
-## Key Features
-
-- *Seamless Portfolio Creation*: Easily add your name, tagline, work experience, skills, projects, and other details.
-- *3D Models Integration*: Enhance your portfolio with attractive 3D models using Three.js.
-- *User-friendly Interface*: Intuitive design ensures a seamless user experience.
-- *Personalized Portfolio Links*: Generate and share your personalized portfolio link with ease.
-
-<br>
-
----
-
-## How to Use
-
-1. *Add Details*: Enter your name, tagline, work experience, tech stack, projects, and other details.
-2. *Create Portfolio*: Click on the link creation button to generate a personalized portfolio link.
-3. *Share Your Portfolio*: Use the generated link to share your portfolio with anyone.
-
-The portfolio contains all your information with a beautiful UI, enhanced with 3D models for an attractive appearance.
-
-<br>
-
----
-
-## Screenshots
-
-<div>
-  <br>
-  <b>1) Login Page</b>
-  <br><br>
-  <img src="readme assets\login.png" alt="Login Page"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>2) Portfolio Creation -</b> Add an Introduction
-  <br><br>
-  <img src="readme assets\create1.png" alt="Portfolio Creation - Introduction"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>3) Portfolio Creation -</b> Add Work Experience Details
-  <br><br>
-  <img src="readme assets\create2.png" alt="Portfolio Creation - Overview and Work Experience"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>4) Portfolio Creation -</b> Add your Projects Details
-  <br><br>
-  <img src="readme assets\create3.png" alt="Portfolio Creation - Tech Stack and Projects"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>5) Portfolio Link Generation - </b> Click on the button to copy the link to your portfolio website
-  <br><br>
-  <img src="readme assets\create4link.png" alt="Portfolio Link Generation"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>6) My Portfolio - Introduction</b>
-  <br><br>
-  <img src="readme assets\1.png" alt="Personal Portfolio - Part 1"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>7) My Portfolio - Overview</b>
-  <br><br>
-  <img src="readme assets\2.png" alt="Personal Portfolio - Overview"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>8) My Portfolio - Work Experience</b>
-  <br><br>
-  <img src="readme assets\3.png" alt="Personal Portfolio - Work Experience"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>9) My Portfolio - Tech Stack</b>
-  <br><br>
-  <img src="readme assets\4.png" alt="Personal Portfolio - Tech Stack"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>10) My Portfolio - Projects</b>
-  <br><br>
-  <img src="readme assets\5.png" alt="Personal Portfolio - Projects"  width="850px" height="auto"> 
-  <br><br><br><br>
-  <b>11) My Portfolio - Contact Form</b>
-  <br><br>
-  <img src="readme assets\6.png" alt="Personal Portfolio - Contact Form"  width="850px" height="auto"> 
-</div>
-
-<br>
+```
+app/            routes — landing, auth, onboarding, dashboard, editor, /p/[username]
+components/     UI, landing sections, and the 12 portfolio templates
+services/       auth service + provider
+utils/supabase/ browser and server Supabase clients
+supabase/       schema.sql
+proxy.ts        route protection (Next 16's middleware)
+```
