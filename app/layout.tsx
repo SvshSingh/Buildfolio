@@ -11,6 +11,7 @@ import {
   Plus_Jakarta_Sans
 } from "next/font/google";
 import "./globals.css";
+import { getSiteUrl } from "@/lib/site-url";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -71,7 +72,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(getSiteUrl()),
   title: "FolioFast - Minimalist Portfolio Builder",
   description: "Create and preview your minimalist, clean portfolio in real time.",
 };

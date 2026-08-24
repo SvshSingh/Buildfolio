@@ -1,9 +1,10 @@
 import { createClient } from "@/utils/supabase/client";
+import { getSiteUrl } from "@/lib/site-url";
 
 // Supabase rejects any emailRedirectTo that is not on the project's redirect
 // allowlist, so this must match a URL under Auth > URL Configuration.
 function getRedirectOrigin() {
-    return process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || window.location.origin;
+    return process.env.NEXT_PUBLIC_APP_URL ? getSiteUrl() : window.location.origin;
 }
 
 export async function signInWithMagicLink(email: string) {
