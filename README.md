@@ -19,6 +19,13 @@ Fill in `.env.local` from **Supabase > Project Settings > API**, then create the
 tables by running [`supabase/schema.sql`](supabase/schema.sql) in the Supabase
 SQL editor.
 
+Confirm the setup before starting the app — this catches a deleted Supabase
+project, a missing schema, and a malformed `NEXT_PUBLIC_APP_URL`:
+
+```bash
+npm run doctor
+```
+
 ```bash
 npm run dev
 ```
@@ -46,6 +53,7 @@ default email-template links (`?token_hash=&type=`). Failures redirect back to
 
 | Command | Purpose |
 | --- | --- |
+| `npm run doctor` | Check env vars, Supabase reachability, and schema |
 | `npm run dev` | Dev server on http://localhost:3000 |
 | `npm run build` | Production build |
 | `npm run typecheck` | TypeScript check, no emit |
