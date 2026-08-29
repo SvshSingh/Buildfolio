@@ -1,4 +1,4 @@
-# FolioFast
+# Buildfolio
 
 Build and publish a developer portfolio in minutes. Next.js 16 + Supabase, with
 a guided wizard, 12 templates, and a public page at `/p/<username>`.
