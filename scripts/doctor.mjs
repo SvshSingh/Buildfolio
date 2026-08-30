@@ -156,7 +156,44 @@ if (host) {
         "Run supabase/schema.sql in the Supabase SQL editor."
       );
     }
+
+    // Storage. A missing bucket answers NoSuchBucket; an existing one answers
+    // NoSuchKey for the same missing object, which is what distinguishes them
+    // without needing a service-role key.
+    {
+      let ok = false;
+      let detail = "";
+      try {
+        const res = await fetch(
+          `${supabaseUrl.replace(/\/+$/, "")}/storage/v1/object/public/portfolio-assets/__doctor_probe__`,
+          { signal: AbortSignal.timeout(10000) }
+        );
+        const body = await res.json().catch(() => ({}));
+        ok = body?.code !== "NoSuchBucket";
+        if (!ok) detail = "NoSuchBucket";
+      } catch (e) {
+        detail = e.message;
+      }
+      record(
+        ok,
+        'Storage bucket "portfolio-assets" exists',
+        ok ? "ok" : detail,
+        "Photo and logo uploads write to this bucket. Run supabase/schema.sql, which creates it."
+      );
+    }
   }
+}
+
+// ------------------------------------------------------------ resume import
+
+{
+  const key = env("OPENROUTER_API_KEY");
+  record(
+    Boolean(key),
+    "OPENROUTER_API_KEY is set",
+    key ? `${key.slice(0, 8)}…` : "missing",
+    "Resume import returns a 500 without it. Server-side only — never prefix it with NEXT_PUBLIC_."
+  );
 }
 
 // -------------------------------------------------------------- reporting

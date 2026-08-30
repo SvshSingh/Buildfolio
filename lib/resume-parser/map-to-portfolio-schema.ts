@@ -70,7 +70,17 @@ function formatMonth(m: string): string {
   return monthMap[m.toLowerCase().substring(0, 3)] || "Jan";
 }
 
-function parseDuration(duration: string) {
+/**
+ * Splits a resume duration on a dash or the word "to".
+ *
+ * This was previously the character class /[-–—to]/i, which matched the letters
+ * "t" and "o" individually — so "Oct 2020 - Dec 2021" split on the leading "O"
+ * and lost its start year, and "March 2021 to June 2023" lost its end date.
+ * Only durations with no "t" or "o" survived.
+ */
+const DURATION_SEPARATOR = /\s*(?:[-–—]|\bto\b)\s*/i;
+
+export function parseDuration(duration: string) {
   const result = {
     startMonth: "Jan",
     startYear: "2023",
@@ -86,7 +96,7 @@ function parseDuration(duration: string) {
     result.isCurrent = true;
   }
 
-  const parts = duration.split(/[-–—to]/i).map((s) => s.trim());
+  const parts = duration.split(DURATION_SEPARATOR).map((s) => s.trim());
   const startPart = parts[0] || "";
   const endPart = parts[1] || "";
 

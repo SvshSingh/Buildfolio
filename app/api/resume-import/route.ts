@@ -3,21 +3,59 @@ import { NextRequest, NextResponse } from "next/server";
 import pdf from "pdf-parse/lib/pdf-parse.js";
 import mammoth from "mammoth";
 import { buildExtractionPrompt } from "@/lib/resume-parser/extract-prompt";
+import { createClient } from "@/utils/supabase/server";
+import { cleanJsonString } from "@/lib/resume-parser/clean-json";
 
 export const dynamic = "force-dynamic";
 
-function cleanJsonString(raw: string): string {
-  let cleaned = raw.trim();
-  // Strip starting code block indicator e.g. ```json or ```
-  if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```[a-zA-Z]*\n?/, "");
-    cleaned = cleaned.replace(/\n?```$/, "");
-  }
-  return cleaned.trim();
-}
+/** Resume imports allowed per user per rolling window. */
+export const RATE_LIMIT_MAX = 5;
+export const RATE_LIMIT_WINDOW_MINUTES = 60;
 
 export async function POST(request: NextRequest) {
   try {
+    // This endpoint spends money on every call, so it is gated on a real
+    // session before any parsing or model work happens.
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Please sign in to import a resume." },
+        { status: 401 }
+      );
+    }
+
+    const windowStart = new Date(
+      Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000
+    ).toISOString();
+
+    const { count, error: countError } = await supabase
+      .from("resume_imports")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", windowStart);
+
+    if (countError) {
+      console.error("Rate limit lookup failed:", countError);
+      return NextResponse.json(
+        { error: "Could not verify your import quota. Please try again." },
+        { status: 503 }
+      );
+    }
+
+    if ((count ?? 0) >= RATE_LIMIT_MAX) {
+      return NextResponse.json(
+        {
+          error: `You have used all ${RATE_LIMIT_MAX} resume imports for this hour. Please fill the form manually or try again later.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("resume") as File | null;
 
@@ -112,17 +150,26 @@ export async function POST(request: NextRequest) {
       "X-Title": "FolioFast Resume Parser",
     };
 
-    // Ordered by quality — first model that succeeds wins.
-    // Paid models are tried first with a max_tokens cap to stay within free-tier credit limits.
-    // Free-tier models are used as fallback when paid models hit 402 / rate-limits.
+    // One primary and one free fallback. A longer chain multiplied the cost and
+    // latency of a single request by up to six with little added reliability.
     const CANDIDATE_MODELS = [
       { id: "google/gemini-2.5-flash",                                  maxTokens: 4000 },
-      { id: "google/gemma-4-31b-it:free",                               maxTokens: 4000 },
       { id: "meta-llama/llama-3.3-70b-instruct:free",                   maxTokens: 4000 },
-      { id: "qwen/qwen3-coder:free",                                    maxTokens: 4000 },
-      { id: "nvidia/nemotron-3-ultra-550b-a55b:free",                   maxTokens: 4000 },
-      { id: "google/gemma-4-26b-a4b-it:free",                           maxTokens: 4000 },
     ];
+
+    // Recorded before the first upstream call, so a request that fails partway
+    // through still counts against the quota.
+    const { error: logError } = await supabase
+      .from("resume_imports")
+      .insert({ user_id: user.id });
+
+    if (logError) {
+      console.error("Could not record resume import attempt:", logError);
+      return NextResponse.json(
+        { error: "Could not verify your import quota. Please try again." },
+        { status: 503 }
+      );
+    }
 
     let rawContent: string | null = null;
     let lastErrorStatus = 500;
